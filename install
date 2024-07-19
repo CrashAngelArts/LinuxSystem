@@ -1,0 +1,67 @@
+#!/bin/bash
+
+Applications() {
+	apt -y install pipx lolcat figlet python3-pip git gh cmatrix tmux zsh tealdeer zoxide delta cava cargo wget curl
+
+	pip3 install tqdm --break-system-packages
+	pip3 install chromadb --break-system-packages
+
+	chmod +x rm
+	cp rm /bin/
+	echo "alias rm='python3 /bin/rm '" >> ~/.zshrc
+	source ~/.zshrc
+}
+
+TMUX() {
+        cd
+        git clone https://github.com/gpakosz/.tmux.git
+        ln -s -f .tmux/.tmux.conf
+        cp .tmux/.tmux.conf.local .
+}
+
+UnHack() {
+        # Unhackable Controled System Deleted Files From Scrap ?
+        cp rm.py /bin
+        alias rm='python3 rm.py'
+}
+
+AnsiArts() {
+        cp ansiview /bin
+        cp ansipacks /bin
+}
+
+ZSH() {
+        # Fonts
+        wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.0.2/JetBrainsMono.zip \
+        && cd ~/.local/share/fonts \
+        && unzip JetBrainsMono.zip \
+        && rm JetBrainsMono.zip \
+        && fc-cache -fv
+
+        # PowerLevel 10k
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+        git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+        git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+        git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+        git clone https://github.com/junegunn/fzf.git ~/.fzf
+
+        # zsh mods
+        ZSH_THEME="powerlevel10k/powerlevel10k"
+        plugins=(git zsh-autosuggestions zsh-syntax-highlighting )
+        source $ZSH/oh-my-zsh.sh
+        [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+        [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+        figlet "Master Evolution" | lolcat
+}
+
+
+LunarVim() {
+	apt install -y neovim
+	LV_BRANCH='release-1.4/neovim-0.9' bash <(curl -s https://raw.githubusercontent.com/LunarVim/LunarVim/release-1.4/neovim-0.9/utils/installer/install.sh)
+}
+
+Applications
+#TMUX
+#ZSH
+#NeoVimUbuntu
+#LunarVim
