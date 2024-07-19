@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Verifica se um diretório foi fornecido como argumento
+if [ $# -eq 0 ]; then
+  echo "Uso: $0 <diretorio>"
+  exit 1
+fi
+
+# Diretório de entrada
+diretorio="$1"
+
+# Loop para percorrer todos os arquivos com a extensão .ANS
+for arquivo in "$diretorio"/*.ANS; do
+  iconv -f 437 "$arquivo"
+  read
+done

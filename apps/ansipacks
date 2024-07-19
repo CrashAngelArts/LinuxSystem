@@ -1,15 +1,95 @@
 #!/bin/bash
 
-# Verifica se um diretório foi fornecido como argumento
+ANSI_MOTD_ART_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/ansimotd/"
+
+download_art() {
+	if [ ! -d "$ANSI_MOTD_ART_DIR" ]; then
+		mkdir -p "$ANSI_MOTD_ART_DIR"
+		echo "DOWNLOADING..."
+		apt install wget -y
+		wget --directory-prefix "$ANSI_MOTD_ART_DIR" --recursive \
+		--no-verbose --no-clobber --no-parent --level 1 --accept zip "$1"
+		unpack_art
+
+	fi
+}
+
+unpack_art() {
+  for file in "$ANSI_MOTD_ART_DIR/artscene.textfiles.com/artpacks/1999"/*.zip; do
+    unzip -q -n -C "$file" '*.ans' '*.img' '*.asc' -d "$ANSI_MOTD_ART_DIR"
+  done
+}
+random_art_file() {
+
+  if command -v fd &> /dev/null; then
+
+    fd --extension ans --extension img --extension asc --absolute-path --type f --search-path "$ANSI_MOTD_ART_DIR" | shuf -n 1
+
+  else
+
+    find "$ANSI_MOTD_ART_DIR" -type f -iname '*.ans' -o -iname '*.img' -o -iname '*.asc' | shuf -n 1
+
+  fi
+
+}
+
+random_art() {
+
+  local ansi_filename
+
+  if [ $# -eq 1 ]; then
+
+    ansi_filename="$1"
+
+  else
+
+    ansi_filename=$(random_art_file)
+
+  fi
+
+  if [ -n "$ansi_filename" ]; then
+
+    viewer=(cat)
+
+    if command -v pv &> /dev/null; then
+
+      viewer=(pv --quiet --rate-limit 1T)
+
+    fi
+
+    iconv -f 437 < "$ansi_filename" | ${viewer}
+
+    if [ -n "$ANSI_MOTD_DISABLE_LINE_WRAPPING" ]; then
+
+      print -n '\e[?7l'
+
+    fi
+
+    export ANSI_MOTD_FILENAME="$ansi_filename"
+
+  else
+
+    echo "\
+
+I couldn't find any ansi art to display, I tried looking in '$ANSI_MOTD_ART_DIR' 😢
+
+For help on getting some checkout the README available at
+
+https://github.com/yuhonas/zsh-ansimotd#getting-some-awesome-ansi-art-to-display
+
+" >&2
+
+  fi
+
+}
+
 if [ $# -eq 0 ]; then
-  echo "Uso: $0 <diretorio>"
-  exit 1
+
+  download_art "http://artscene.textfiles.com/artpacks/1999/"
+  random_art
+
+else
+
+  random_art "$1"
+
 fi
-
-# Diretório de entrada
-diretorio="$1"
-
-# Loop para percorrer todos os arquivos e subdiretórios
-find "$diretorio" -type f -name "*.ANS" -print0 | while IFS= read -r -d $'\0' arquivo; do
-  iconv -f 437 "$arquivo"
-done
