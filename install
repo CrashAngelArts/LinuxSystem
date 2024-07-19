@@ -12,6 +12,14 @@ Applications() {
 	source ~/.zshrc
 }
 
+ AnsiArts(){
+        git clone https://github.com/cmang/durdraw.git  
+        cd durdraw 
+        python3 setup.py install
+        ./installconf.sh
+        ./start-durdraw -p examples/*.ANS
+}
+
 TMUX() {
         cd
         git clone https://github.com/gpakosz/.tmux.git
